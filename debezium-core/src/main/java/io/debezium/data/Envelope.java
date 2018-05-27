@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
@@ -308,11 +309,31 @@ public final class Envelope {
      * @return the operation, or null if no valid operation was found in the record
      */
     public static Operation operationFor(SourceRecord record) {
-        Struct value = (Struct) record.value();
-        Field opField = value.schema().field(FieldName.OPERATION);
-        if (opField != null) {
-            return Operation.forCode(value.getString(opField.name()));
-        }
-        return null;
+      return operationFor((Struct) record.value());
+       
     }
+    
+    /**
+     * Obtain the operation for the given connect record.
+     *
+     * @param record the connect record; may not be null
+     * @return the operation, or null if no valid operation was found in the record
+     */
+	public static Operation operationFor(ConnectRecord record) {
+		return operationFor((Struct) record.value());
+	}
+	
+	/**
+     * Obtain the operation for the given struct.
+     *
+     * @param struct; may not be null
+     * @return the operation, or null if no valid operation was found in the record
+     */
+	private static Operation operationFor(Struct value) {
+		 Field opField = value.schema().field(FieldName.OPERATION);
+	        if (opField != null) {
+	            return Operation.forCode(value.getString(opField.name()));
+	        }
+	        return null;
+	}
 }
